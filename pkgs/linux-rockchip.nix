@@ -43,6 +43,14 @@ let
   pinetabKernelConfig = with lib.kernel; {
     DRM_PANEL_BOE_TH101MB31UIG002_28A = yes;
   };
+  armbianRk3528KernelConfig = with lib.kernel;
+    kernelConfig
+    // {
+      CPU_RK3528 = yes;
+      PCIE_ROCKCHIP_DW_HOST = lib.mkForce unset;
+      PCIE_DW_ROCKCHIP = yes;
+      ROCKCHIP_VOP2 = lib.mkForce unset;
+    };
   pinetabKernelPatches = [
     {
       name = "Enable backlight in defconfig";
@@ -256,6 +264,22 @@ in
           patch = ./patches/linux/6.17/rk3588-0802-wireless-add-clk-property.patch;
         }
       ];
+    }
+  );
+
+  linux_6_1_armbian_rkr5_1 = pkgs-stable.linuxKernel.packagesFor (
+    pkgs-stable.linuxKernel.kernels.linux_6_1.override {
+      argsOverride = {
+        src = pkgs-stable.fetchFromGitHub {
+          owner = "armbian";
+          repo = "linux-rockchip";
+          rev = "95e85f6cb496c75807c5b16f158853578e7e7d1b";
+          sha256 = "sha256-9FRnHvN1/ZwO24QhytvwwwIqSJ24ROh5eWYFkcEonWE=";
+        };
+        version = "6.1.115-armbian-rkr5.1";
+        modDirVersion = "6.1.115";
+      };
+      structuredExtraConfig = armbianRk3528KernelConfig;
     }
   );
 }

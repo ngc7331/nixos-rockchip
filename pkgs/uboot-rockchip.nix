@@ -132,6 +132,70 @@ let
         license = pkgs-stable.lib.licenses.unfreeRedistributableFirmware;
       };
     };
+  buildRK3528UBoot =
+    {
+      defconfig,
+      extraPatches ? [ ],
+    }:
+    let
+      version = "v2024.10-0-g39cd993e5d";
+      src = fetchFromGitHub {
+        owner = "radxa";
+        repo = "u-boot";
+        rev = "39cd993e5d6296635438e84f4576b3a9bf76f86e";
+        sha256 = "sha256-4l2foG3RkKvKKQfvHfFRvY5p5c85Wa2tRyyCITMp6wo=";
+      };
+      rkbin = fetchFromGitHub {
+        owner = "rockchip-linux";
+        repo = "rkbin";
+        rev = "0b3e87afc2abd8dd6eb0052cd1be00de94a96637";
+        sha256 = "sha256-tG8v9jriOsLmDgaI8ClxVVzlvKsalcddyS4Ri5O54Q0=";
+      };
+      armbianDefconfig = ./patches/u-boot/rk3528/hinlink_rk3528_defconfig;
+      armbianDts = ./patches/u-boot/rk3528/rk3528-hinlink-h28k.dts;
+    in
+    buildUBoot {
+      inherit defconfig src version;
+      buildFlags = [
+        "all"
+        "u-boot.itb"
+      ];
+      filesToInstall = [
+        "idbloader.img"
+        "u-boot.itb"
+      ];
+      extraPatches = extraPatches;
+      extraConfig = ''
+        CONFIG_CMD_BOOTEFI=y
+        CONFIG_EFILOADER=y
+        CONFIG_BLK=y
+        CONFIG_PARTITIONS=y
+        CONFIG_BOOTM_EFI=y
+        CONFIG_FIT_SIGNATURE=y
+        CONFIG_SPL_FIT_SIGNATURE=y
+        CONFIG_SPL_FIT_ROLLBACK_PROTECT=n
+        CONFIG_FIT_ROLLBACK_PROTECT=n
+        CONFIG_FIT_ENABLE_RSASSA_PSS_SUPPORT=n
+      '';
+      postPatch = ''
+        patchShebangs tools
+        patchShebangs scripts
+        patchShebangs arch/arm/mach-rockchip
+        cp ${armbianDefconfig} configs/${defconfig}
+        cp ${armbianDts} arch/arm/dts/rk3528-hinlink-h28k.dts
+      '';
+      postBuild = ''
+        tools/mkimage -n rk3528 -T rksd -d "$ROCKCHIP_TPL:spl/u-boot-spl.bin" idbloader.img
+      '';
+      env = {
+        BL31 = (rkbin + "/bin/rk35/rk3528_bl31_v1.17.elf");
+        ROCKCHIP_TPL = (rkbin + "/bin/rk35/rk3528_ddr_1056MHz_v1.09.bin");
+      };
+      extraMeta = {
+        platforms = [ "aarch64-linux" ];
+        license = lib.licenses.unfreeRedistributableFirmware;
+      };
+    };
 in
 {
   uBootQuartz64A = buildRK3566UBoot { defconfig = "quartz64-a-rk3566_defconfig"; };
@@ -191,4 +255,8 @@ in
   uBootRadxaRock4CPlus = buildRK3399UBoot "rock-4c-plus-rk3399_defconfig";
   uBootNanoPCT6 = buildRK3588UBoot "nanopc-t6-rk3588_defconfig";
   uBootSige7 = buildRK3588UBoot "sige7-rk3588_defconfig";
+  uBootHinlinkHT2 = buildRK3528UBoot {
+    defconfig = "hinlink_rk3528_defconfig";
+    extraPatches = [ ./patches/u-boot/rk3528/0001-rk3528-dts-Makefile-add-hinlink-h28k.dtb.patch ];
+  };
 }

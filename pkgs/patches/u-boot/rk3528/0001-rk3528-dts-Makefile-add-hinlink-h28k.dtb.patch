@@ -1,0 +1,18 @@
+From: Armbian <info@armbian.com>
+Date: Thu, 1 Jan 2024 00:00:00 +0000
+Subject: [PATCH] rk3528: dts Makefile: add hinlink h28k dtb
+
+---
+ arch/arm/dts/Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -49,6 +49,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += \
+ 	rk3328-evb.dtb \
+ 	rk3368-lion.dtb \
+ 	rk3368-sheep.dtb \
++	rk3528-hinlink-h28k.dtb \
+ 	rk3368-geekbox.dtb \
+ 	rk3368-px5-evb.dtb \
+ 	rk3399-evb.dtb \

@@ -192,6 +192,14 @@
               noZFS
             ];
           };
+          "HinlinkHT2" = {
+            uBoot = uBoot.uBootHinlinkHT2;
+            kernel = kernel.linux_6_1_armbian_rkr5_1;
+            extraModules = [
+              noZFS
+              { hardware.deviceTree.name = "rockchip/rk3528-hinlink-ht2.dtb"; }
+            ];
+          };
         };
 
       osConfigs =
@@ -242,6 +250,8 @@
 
           kernel_linux_6_18_orangepi5b_stable = kernel.linux_6_18_orangepi5b_stable;
           kernel_linux_6_18_orangepi5b_unstable = kernel.linux_6_18_orangepi5b_unstable;
+
+          kernel_linux_6_1_armbian_rkr5_1 = kernel.linux_6_1_armbian_rkr5_1;
         };
         packages = (images system) // {
           uBootQuartz64A = uBoot.uBootQuartz64A;
@@ -268,6 +278,8 @@
           uBootNanoPCT6 = uBoot.uBootNanoPCT6;
 
           uBootSige7 = uBoot.uBootSige7;
+
+          uBootHinlinkHT2 = uBoot.uBootHinlinkHT2;
 
           bes2600 = bes2600Firmware;
           bes2600Firmware = bes2600Firmware;
