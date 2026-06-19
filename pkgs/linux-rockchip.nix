@@ -43,68 +43,12 @@ let
   pinetabKernelConfig = with lib.kernel; {
     DRM_PANEL_BOE_TH101MB31UIG002_28A = yes;
   };
-  armbianRk3528KernelConfig = with lib.kernel;
-    kernelConfig
-    // {
-      CPU_RK3528 = yes;
-      DRM_PANEL_INNOLUX_AFJ101_BA2131 = no;
-      DRM_MSM = no;
-      DRM_V3D = no;
-      LT7911D_FB_NOTIFIER = no;
-      MALI400 = no;
-      MALI_MIDGARD = no;
-      MALI450 = lib.mkForce unset;
-      MALI_BIFROST = no;
-      MALI_BIFROST_DEBUG = lib.mkForce unset;
-      MALI_DEBUG = lib.mkForce unset;
-      MALI_IRQ_LATENCY = lib.mkForce unset;
-      MALI_KUTF = no;
-      NVMEM_ROCKCHIP_SEC_OTP = no;
-      PCIE_ROCKCHIP_DW_HOST = lib.mkForce unset;
-      PCIE_DW_ROCKCHIP = yes;
-      CAN_RK3562 = no;
-      COMMON_CLK_ROCKCHIP_REGMAP = lib.mkForce unset;
-      RK_NAND = no;
-      RK_NANDC_NAND = no;
-      RK_SFC_NAND = no;
-      RK_SFC_NAND_MTD = lib.mkForce unset;
-      RK_SFC_NOR = no;
-      RK_SFC_NOR_MTD = lib.mkForce unset;
-      RK_SFTL = lib.mkForce unset;
-      ROCKCHIP_DEBUG = no;
-      ROCKCHIP_HW_DECOMPRESS_USER = no;
-      ROCKCHIP_MINIDUMP = no;
-      ROCKCHIP_MULTI_RGA = no;
-      ROCKCHIP_RKNPU = no;
-      RTC_DRV_RK630 = no;
-      FIQ_DEBUGGER = no;
-      ROCKCHIP_FIQ_DEBUGGER = lib.mkForce unset;
-      MFD_SERDES_DISPLAY = no;
-      RK_DMABUF_DEBUG = no;
-      RK_DMABUF_PROCFS = no;
-      SENSOR_DEVICE = no;
-      SW_SYNC = no;
-      STMMAC_UIO = no;
-      TOUCHSCREEN_CYPRESS_CYTTSP5 = no;
-      TOUCHSCREEN_CYPRESS_CYTTSP5_DEVICE_ACCESS = lib.mkForce unset;
-      TOUCHSCREEN_CHIPONE_9551R = no;
-      TOUCHSCREEN_HIMAX_CHIPSET = no;
-      TOUCHSCREEN_GOODIX_GTX8_UPDATE = no;
-      TOUCHSCREEN_PARADE = no;
-      VIDEO_CAMERA_SENSOR = no;
-      VIDEO_LT7911D = no;
-      VIDEO_AR2020 = lib.mkForce unset;
-      VIDEO_AR0822 = lib.mkForce unset;
-      VIDEO_MAX96712 = no;
-      VIDEO_MAX96714 = no;
-      VIDEO_MAX96722 = no;
-      VIDEO_MAX96756 = no;
-      VIDEO_MAXIM_SERDES = no;
-      VIDEO_ROCKCHIP_PREISP = no;
-      CPU_FREQ_GOV_INTERACTIVE = no;
-      ROCKCHIP_VOP2 = lib.mkForce unset;
-      USB_CONFIGFS_F_UVC = no;
-    };
+  # armbianRk3528KernelConfig = with lib.kernel; {
+  #   # The vendor defconfig enables Android-specific debugging infrastructure
+  #   # that references missing headers in this tree. Disable it.
+  #   ROCKCHIP_DEBUG = no;
+  #   ROCKCHIP_MINIDUMP = no;
+  # };
   pinetabKernelPatches = [
     {
       name = "Enable backlight in defconfig";
@@ -322,18 +266,17 @@ in
   );
 
   linux_6_1_armbian_rkr5_1 = pkgs-stable.linuxKernel.packagesFor (
-    pkgs-stable.linuxKernel.kernels.linux_6_1.override {
-      argsOverride = {
-        src = pkgs-stable.fetchFromGitHub {
-          owner = "armbian";
-          repo = "linux-rockchip";
-          rev = "95e85f6cb496c75807c5b16f158853578e7e7d1b";
-          sha256 = "sha256-9FRnHvN1/ZwO24QhytvwwwIqSJ24ROh5eWYFkcEonWE=";
-        };
-        version = "6.1.115-armbian-rkr5.1";
-        modDirVersion = "6.1.115";
+    pkgs-stable.linuxKernel.manualConfig {
+      src = pkgs-stable.fetchFromGitHub {
+        owner = "armbian";
+        repo = "linux-rockchip";
+        rev = "95e85f6cb496c75807c5b16f158853578e7e7d1b";
+        sha256 = "sha256-9FRnHvN1/ZwO24QhytvwwwIqSJ24ROh5eWYFkcEonWE=";
       };
-      structuredExtraConfig = armbianRk3528KernelConfig;
+      version = "6.1.115-armbian-rkr5.1";
+      modDirVersion = "6.1.115";
+      configfile = ./patches/linux/rk3528/hinlink_ht2_config;
+      extraMeta.branch = "rk-6.1-rkr5.1";
     }
   );
 }
