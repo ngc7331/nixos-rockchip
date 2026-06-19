@@ -198,6 +198,27 @@
             extraModules = [
               noZFS
               { hardware.deviceTree.name = "rockchip/rk3528-hinlink-ht2.dtb"; }
+              {
+                hardware.enableAllHardware = inputs.nixpkgsStable.lib.mkForce false;
+                boot.initrd.availableKernelModules = inputs.nixpkgsStable.lib.mkForce [
+                  "uas"
+                  "usb_storage"
+                  "xhci_hcd"
+                  "xhci_pci"
+                  "ehci_hcd"
+                  "ohci_hcd"
+                  "sdhci"
+                  "sdhci_pltfm"
+                  "sdhci_of_arasan"
+                  "mmc_block"
+                  "dw_mmc"
+                  "dw_mmc_rockchip"
+                  "virtio_blk"
+                  "virtio_pci"
+                  "virtio_scsi"
+                  "nvme"
+                ];
+              }
             ];
           };
         };
