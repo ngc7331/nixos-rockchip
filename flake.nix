@@ -245,19 +245,49 @@
           }
         ) (boards system);
 
+      armbianConfigs =
+        system:
+        builtins.mapAttrs (
+          name: value:
+          inputs.nixpkgsStable.lib.nixosSystem {
+            system = "aarch64-linux";
+
+            modules = [
+              self.nixosModules.sdImageArmbian
+              {
+                system.stateVersion = "24.05";
+
+                rockchip.uBoot = value.uBoot;
+                boot.kernelPackages = value.kernel;
+                sdImage.armbian.enable = true;
+              }
+            ]
+            ++ value.extraModules;
+          }
+        ) (boards system);
+
       images =
         system: builtins.mapAttrs (name: value: value.config.system.build.sdImage) (osConfigs system);
+
+      armbianImages =
+        system: builtins.mapAttrs (name: value: value.config.system.build.sdImage) (armbianConfigs system);
     in
     {
       nixosModules = {
         inherit noZFS;
         sdImageRockchipInstaller = import ./modules/sd-card/sd-image-rockchip-installer.nix;
         sdImageRockchip = import ./modules/sd-card/sd-image-rockchip.nix;
+        sdImageArmbian = import ./modules/sd-card/sd-image-armbian.nix;
         dtOverlayQuartz64ASATA = import ./modules/dt-overlay/quartz64a-sata.nix;
         dtOverlayPCIeFix = import ./modules/dt-overlay/pcie-fix.nix;
         dtOrangePi5B = import ./modules/dt-overlay/rk3588s-orangepi5b.nix;
         dtOverlayPineTab2 = import ./modules/dt-overlay/pinetab2.nix;
         bes2600 = import ./modules/bes2600.nix;
+      };
+
+      nixosConfigurations = {
+        HinlinkHT2 = (osConfigs "x86_64-linux").HinlinkHT2;
+        HinlinkHT2Armbian = (armbianConfigs "x86_64-linux").HinlinkHT2;
       };
     }
     // inputs.utils.lib.eachDefaultSystem (
@@ -301,6 +331,8 @@
           uBootSige7 = uBoot.uBootSige7;
 
           uBootHinlinkHT2 = uBoot.uBootHinlinkHT2;
+
+          HinlinkHT2Armbian = (armbianConfigs system).HinlinkHT2.config.system.build.sdImage;
 
           bes2600 = bes2600Firmware;
           bes2600Firmware = bes2600Firmware;

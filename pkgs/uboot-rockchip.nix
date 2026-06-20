@@ -136,6 +136,7 @@ let
     {
       defconfig,
       extraPatches ? [ ],
+      extraConfig ? "",
     }:
     let
       version = "v2024.10-0-g39cd993e5d";
@@ -176,6 +177,7 @@ let
         CONFIG_SPL_FIT_ROLLBACK_PROTECT=n
         CONFIG_FIT_ROLLBACK_PROTECT=n
         CONFIG_FIT_ENABLE_RSASSA_PSS_SUPPORT=n
+        ${extraConfig}
       '';
       postPatch = ''
         patchShebangs tools
@@ -258,5 +260,8 @@ in
   uBootHinlinkHT2 = buildRK3528UBoot {
     defconfig = "hinlink_rk3528_defconfig";
     extraPatches = [ ./patches/u-boot/rk3528/0001-rk3528-dts-Makefile-add-hinlink-h28k.dtb.patch ];
+    extraConfig = ''
+      CONFIG_BOOTCOMMAND="run distro_bootcmd"
+    '';
   };
 }
