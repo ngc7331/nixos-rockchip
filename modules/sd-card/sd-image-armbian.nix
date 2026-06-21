@@ -60,12 +60,17 @@ let
           ;;
       esac
 
-      cd ..
+      # Patch initrd's /etc/{passwd,group} to enable root login with no password
+      passwdFile=$(find ./nix/store -maxdepth 1 -type f -name '*initrd-passwd' | head -n1)
+      shadowFile=$(find ./nix/store -maxdepth 1 -type f -name '*initrd-shadow' | head -n1)
+      rm -f ./etc/passwd ./etc/shadow
+      sed 's|^root:.*|root:x:0:0:System administrator:/root:/bin/bash|' "$passwdFile" > ./etc/passwd
+      echo "root::0:0:99999:7:::" > ./etc/shadow
 
       # Repack the initrd as gzip (Armbian's boot.cmd expects gzip).
-      # Use 'cd initrd' so files are archived with '/' as root instead of
-      # a leading 'initrd/' directory.
-      (cd initrd && find . -print0 | sort -z | cpio --null -o -H newc --owner=root:root | gzip -9) > "$out/initrd.img"
+      (find . -print0 | sort -z | cpio --null -o -H newc --owner=root:root | gzip -9) > "$out/initrd.img"
+
+      cd ..
 
       # Wrap the gzip initrd as a U-Boot uInitrd image.
       mkimage -A arm64 -O linux -T ramdisk -C gzip -n "NixOS initrd" \
