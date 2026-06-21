@@ -266,7 +266,7 @@ in
   );
 
   linux_6_1_armbian_rkr5_1 = pkgs-stable.linuxKernel.packagesFor (
-    pkgs-stable.linuxKernel.manualConfig {
+    (pkgs-stable.linuxKernel.manualConfig {
       src = pkgs-stable.fetchFromGitHub {
         owner = "armbian";
         repo = "linux-rockchip";
@@ -277,6 +277,8 @@ in
       modDirVersion = "6.1.115";
       configfile = ./patches/linux/rk3528/hinlink_ht2_config;
       extraMeta.branch = "rk-6.1-rkr5.1";
-    }
+    }).overrideAttrs (old: {
+      target = "Image";
+    })
   );
 }
