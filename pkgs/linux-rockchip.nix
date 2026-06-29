@@ -184,7 +184,11 @@ let
 in
 {
   linux_latest_rockchip_stable = pkgs-stable.linuxKernel.packagesFor (
-    pkgs-stable.linuxKernel.kernels.linux_latest.override { structuredExtraConfig = kernelConfig; }
+    (
+      pkgs-stable.linuxKernel.kernels.linux_latest.override { structuredExtraConfig = kernelConfig; }
+    ).overrideAttrs( old: {
+      target = "Image";
+    })
   );
   linux_latest_rockchip_unstable = pkgs.linuxKernel.packagesFor (
     pkgs.linuxKernel.kernels.linux_latest.override { structuredExtraConfig = kernelConfig; }
